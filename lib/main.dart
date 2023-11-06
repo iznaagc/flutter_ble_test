@@ -1,6 +1,5 @@
 import 'package:ble_test/ble_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 
 void main() {
@@ -33,14 +32,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const mockMode = true; // UIチェック用モックモードの切り替え
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("BLE SCANNER"),),
+      appBar: AppBar(
+        title: const Text("BLE SCANNER"),
+      ),
       body: GetBuilder<BleController>(
-        init: BleController(),
-        builder: (BleController controller)
-        {
+        init: BleController()..mockMode = mockMode,
+        builder: (BleController controller) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -48,8 +50,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(
                   height: 15,
                 ),
-                Expanded( // ← こちらを追加
-                  child: StreamBuilder<List<ScanResult>>(
+                Expanded(
+                  child: StreamBuilder<List<DeviceData>>(
                     stream: controller.scanResult,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
@@ -60,21 +62,27 @@ class _MyHomePageState extends State<MyHomePage> {
                             return Card(
                               elevation: 2,
                               child: ListTile(
-                                title: Text(data.device.name),
-                                subtitle: Text(data.device.id.id),
+                                title: Text(data.name),
+                                subtitle: Text(data.id),
                                 trailing: Text(data.rssi.toString()),
                               ),
                             );
                           },
                         );
                       } else {
-                        return const Center(child: Text("No Device Found"),);
+                        return const Center(
+                          child: Text("No Device Found"),
+                        );
                       }
                     },
                   ),
                 ),
-                ElevatedButton(onPressed: () => controller.scanDevices(), child: const Text("SCAN")),
-                const SizedBox(height: 15,),
+                ElevatedButton(
+                    onPressed: () => controller.scanDevices(),
+                    child: const Text("SCAN")),
+                const SizedBox(
+                  height: 15,
+                ),
               ],
             ),
           );
